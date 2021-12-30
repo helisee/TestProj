@@ -10,13 +10,14 @@ public class LineController : MonoBehaviour
     [SerializeField] private Line strechLine;
     [SerializeField] private Line forceLine;
 
-    
     void Start()
     {
         GameObject strech = Instantiate((GameObject) Resources.Load("Prefabs/Line"),
                                         new Vector3(0f, 0f, 0f) , 
                                         Quaternion.identity );
-        GameObject force = Instantiate((GameObject) Resources.Load("Prefabs/Line"), new Vector3(0f, 0f, 0f) , Quaternion.identity );
+        GameObject force = Instantiate((GameObject) Resources.Load("Prefabs/Line"), 
+                                        new Vector3(0f, 0f, 0f) , 
+                                        Quaternion.identity );
         strech.name = "Strech";
         force.name = "Force";
 
@@ -24,7 +25,6 @@ public class LineController : MonoBehaviour
         forceLine = force.GetComponent<Line>();
     }
 
-    
     void Update()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -37,12 +37,23 @@ public class LineController : MonoBehaviour
                 if (hit.collider != null && hit.collider.GetComponent<Unit>())
                 {
                     selectUnit = hit.collider.gameObject;
-                    strechLine.DrawLine(hit.collider.transform.position, hit.collider.transform.position);
+                    Vector3 unitPos = new Vector3(
+                        selectUnit.transform.position.x,
+                        selectUnit.transform.position.y,
+                        selectUnit.transform.position.z
+                        );
+                    strechLine.DrawLine(unitPos, unitPos);
+                    strechLine.SetPosition(Vector3.zero);
+                    forceLine.DrawLine(unitPos, unitPos);
+                    forceLine.SetPosition(Vector3.zero);
+
+                    Debug.Log("hit pos: " + hit.collider.transform.position );
                 }
             }
             else
             {
                 strechLine.Disable();
+                forceLine.Disable();
             }
         }
         if (Input.GetMouseButton(0))
@@ -50,27 +61,47 @@ public class LineController : MonoBehaviour
             if (strechLine.Enabled())
             {
                 Vector3 mousePos = Input.mousePosition;
-                float cameraDistance = selectUnit.transform.position.z - Camera.main.transform.position.z;
-                Vector3 mousePosition = Camera.main.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, cameraDistance));
+                float cameraDistance = selectUnit.transform.position.z - Camera.main.transform.position.z; 
+                Vector3 mousePosition = Camera.main.ScreenToWorldPoint(new Vector3(
+                    mousePos.x,
+                    mousePos.y,
+                    cameraDistance
+                    ));
+                
                 /*
                 ClearLog();
                 Debug.Log("mousePosition: " + mousePos);
                 Debug.Log("selectUnit pos z = " + selectUnit.transform.position.z);
                 Debug.Log("worldPoint: " + mousePosition);
                 */
-                Vector3 point = new Vector3(mousePosition.x, mousePosition.y, Camera.main.nearClipPlane);
-                strechLine.DrawLine(point);
+                Vector3 point = new Vector3(
+                    mousePosition.x, 
+                    mousePosition.y, 
+                    point.z = selectUnit.transform.position.z
+                    );
                 
+                Vector3 unitPos = new Vector3(
+                    selectUnit.transform.position.x, 
+                    selectUnit.transform.position.y, 
+                    selectUnit.transform.position.z
+                    );
+                strechLine.DrawLine(unitPos, point); 
+                //Quaternion rot = Quaternion.AngleAxis(180f, selectUnit.transform.position);
+                //point = transform.InverseTransformDirection(Vector3.forward);
+                forceLine.DrawLine(unitPos, -point + 2 * unitPos); 
             }
         }
 
         if (Input.GetMouseButtonUp(0) && strechLine.Enabled())
         {
-            selectUnit.GetComponent<Unit>().AddForce(-strechLine.GetPositionTo());
+            Debug.Log("Force: " + -strechLine.GetPositionTo());
+            selectUnit.GetComponent<Unit>().AddForce(-strechLine.GetPositionTo() );
             strechLine.Disable();
+            forceLine.Disable();
+            //forceLine.SetPosition(selectUnit.transform.position);
+            //forceLine.DrawLine(-strechLine.GetPositionTo(), selectUnit.transform.position );
         }
     }
-
 
     public void ClearLog()
     {
@@ -79,11 +110,4 @@ public class LineController : MonoBehaviour
         var method = type.GetMethod("Clear");
         method.Invoke(new object(), null);
     }
-
-
-    /*
-     * x Сделать отключение пр рисовки линии после рисовки
-     
-     
-     */
 }

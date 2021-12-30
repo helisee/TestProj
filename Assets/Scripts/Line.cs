@@ -99,16 +99,19 @@ public class Line : MonoBehaviour
         lineRenderer.enabled = false;
     }
 
+    public Vector3 GetPositionFrom()
+    {
+        return lineRenderer.GetPosition(0);
+    }
+
     public Vector3 GetPositionTo()
     {
         return lineRenderer.GetPosition(1);
     }
 
-    public void ClearLog()
+    public void SetPosition(Vector3 pos)
     {
-        Assembly assembly = Assembly.GetAssembly(typeof(SceneView));
-        var type = assembly.GetType("UnityEditor.LogEntries");
-        var method = type.GetMethod("Clear");
-        method.Invoke(new object(), null);
+        transform.position = pos;
     }
+    
 }

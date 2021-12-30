@@ -5,11 +5,11 @@ using UnityEngine;
 public class Unit : MonoBehaviour
 {
     private Vector3 ForceVector;
-    private Rigidbody rigidbody;
+    private Rigidbody _rigidbody;
 
     void Start()
     {
-        rigidbody = gameObject.GetComponent<Rigidbody>();    
+        _rigidbody = gameObject.GetComponent<Rigidbody>();    
     }
     
     void Update()
@@ -19,8 +19,15 @@ public class Unit : MonoBehaviour
 
     public void AddForce(Vector3 forceVector)
     {
-        rigidbody.AddForce(forceVector * 200f, ForceMode.Force);    
+        _rigidbody.isKinematic = false;  
+        _rigidbody.AddForce(forceVector * 200f, ForceMode.Force);
+        StartCoroutine(Flight(0.5f));
+        
     }
 
-
+    IEnumerator Flight(float sec = 2f)
+    {
+        yield return new WaitForSeconds(sec);
+        _rigidbody.isKinematic = true;
+    }
 }
